@@ -1,0 +1,19 @@
+[project]
+name = "ai-search-course"
+version = "0.1.0"
+description = "This project is about processing documents and returning the summarize version of user search query using AI"
+authors = [
+    {name = "abhishek nautiyal",email = "abhishek.nautiyal@witds.com"}
+]
+readme = "README.md"
+requires-python = ">=3.10,<4.0"
+dependencies = [
+    "gradio (>=5.35.0,<6.0.0)",
+    "langchain[anthropic] (>=0.3.26,<0.4.0)",
+    "sentence-transformers (>=5.0.0,<6.0.0)"
+]
+
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
