@@ -1,3 +1,7 @@
+from dotenv import load_dotenv
+load_dotenv()
+
+
 from fastapi import FastAPI
 from gradio.routes import mount_gradio_app
 from app.ui.admin.file_upload import get_upload_ui
