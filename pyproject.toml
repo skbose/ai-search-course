@@ -1,9 +1,9 @@
 [project]
 name = "ai-search-course"
 version = "0.1.0"
-description = ""
+description = "AI-powered document search application with RAG capabilities"
 authors = [
-    {name = "Ankush Panwar",email = "ankush.panwar@witds.com"}
+    {name = "Ankush Panwar", email = "ankush.panwar@witds.com"}
 ]
 readme = "README.md"
 requires-python = ">=3.10,<4.0"

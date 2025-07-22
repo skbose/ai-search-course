@@ -1,18 +1,16 @@
-from qdrant_client.models import Distance, VectorParams, PointStruct
-from .qdrant_client import client, ensure_collection
-import os
+from qdrant_client.models import PointStruct
+from .qdrant_client import client, ensure_collection, COLLECTION_NAME
 import uuid
-from dotenv import load_dotenv
-load_dotenv()
-
-QDRANT_COLLECTION = os.getenv("QDRANT_COLLECTION", "my_docs")
-
 
 
 def index_embeddings(embeddings: list[list[float]], texts: list[str]):
     """
     Indexes the embedding vectors and their corresponding texts into Qdrant.
     """
+    
+    if not embeddings or not texts:
+        raise ValueError("Embeddings and texts cannot be empty")
+    
     assert len(embeddings) == len(texts), "Mismatch between embeddings and texts"
 
     # Create points with metadata
@@ -22,7 +20,7 @@ def index_embeddings(embeddings: list[list[float]], texts: list[str]):
             vector=embedding,
             payload={"text": text}
         )
-        for embedding, text in zip(embeddings, texts)
+        for embedding, text in zip(embeddings, texts, strict=True)
     ]
 
     vector_size = len(embeddings[0])
@@ -30,7 +28,7 @@ def index_embeddings(embeddings: list[list[float]], texts: list[str]):
 
     # Upload to Qdrant
     client.upsert(
-        collection_name=QDRANT_COLLECTION,
+        collection_name=COLLECTION_NAME,
         points=points
     )
 

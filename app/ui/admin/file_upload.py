@@ -10,7 +10,14 @@ from app.vector_store.indexer import index_embeddings
 def upload_file(file):
     status = []  # Collect status messages
     try:
+        if not file or not file.name:
+            return "❌ No file uploaded. Please upload a valid PDF file."
+        
         file_path = file.name
+        # validate file file extension
+        if not file_path.lower().endswith('.pdf'):
+            return "❌ Invalid file type. Please upload a PDF file."
+
         status.append(f"✅ File received: {os.path.basename(file_path)}")
 
         # ✅ Step 1: Load the PDF
@@ -33,13 +40,15 @@ def upload_file(file):
         status.append("🔢 Sample embedding (first 10 values): " + str(embeddings[0][:10]))
 
         # ✅ Step 5: Index into Qdrant
-        index_embeddings(embeddings, chunks)
+        texts = [chunk.page_content for chunk in chunks]
+        index_embeddings(embeddings, texts)
         status.append("📥 Embeddings indexed into Qdrant successfully.")
 
         return "\n\n".join(status)
 
     except Exception as e:
-        error_msg = f"❌ Failed to process: {str(e)}"
+        import traceback
+        error_msg = f"❌ Failed to process: {str(e)}\n\nTraceback:\n{traceback.format_exc()}"
         status.append(error_msg)
         return "\n\n".join(status)
 

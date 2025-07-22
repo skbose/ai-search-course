@@ -3,7 +3,12 @@ from langchain_openai import OpenAIEmbeddings
 from langchain_core.documents import Document
 
 # Initialize once (reuse this instance)
-embedding_model = OpenAIEmbeddings(model="text-embedding-3-large")
+try:
+    embedding_model = OpenAIEmbeddings(model="text-embedding-3-large")
+except Exception as e:
+    print(f"❌ Failed to initialize OpenAI embeddings: {e}")
+    print("💡 Make sure OPENAI_API_KEY is set in your environment")
+    raise
 
 def generate_embeddings(chunks: List[Document]) -> List[List[float]]:
     """
@@ -15,9 +20,20 @@ def generate_embeddings(chunks: List[Document]) -> List[List[float]]:
     Returns:
         List[List[float]]: List of embedding vectors.
     """
+    if not chunks:
+        return []
+    
     texts = [doc.page_content for doc in chunks]
-    embeddings = embedding_model.embed_documents(texts)
-    return embeddings
+    
+    if not any(text.strip() for text in texts):
+        raise ValueError("All documents are empty. Cannot generate embeddings.")
+    
+    try: 
+        embeddings = embedding_model.embed_documents(texts)
+        return embeddings
+    except Exception as e:
+        print(f"❌ Failed to generate embeddings: {e}")
+        return []
 
 def generate_query_embedding(query: str) -> List[float]:
     """
@@ -29,4 +45,11 @@ def generate_query_embedding(query: str) -> List[float]:
     Returns:
         List[float]: Embedding vector for the query.
     """
-    return embedding_model.embed_query(query)
+    if not query or not query.strip():
+        raise ValueError("Query cannot be empty")
+    
+    try:
+         return embedding_model.embed_query(query)
+    except Exception as e:
+        print(f"❌ Failed to generate query embedding: {e}")
+        raise
