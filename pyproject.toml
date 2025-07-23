@@ -1,16 +1,24 @@
 [project]
 name = "ai-search-course"
 version = "0.1.0"
-description = "This project is about processing documents and returning the summarize version of user search query using AI"
+description = "AI-powered document search application with RAG capabilities"
 authors = [
-    {name = "abhishek nautiyal",email = "abhishek.nautiyal@witds.com"}
+    {name = "Ankush Panwar", email = "ankush.panwar@witds.com"}
 ]
 readme = "README.md"
 requires-python = ">=3.10,<4.0"
 dependencies = [
-    "gradio (>=5.35.0,<6.0.0)",
+    "gradio (>=5.38.0,<6.0.0)",
     "langchain[anthropic] (>=0.3.26,<0.4.0)",
-    "sentence-transformers (>=5.0.0,<6.0.0)"
+    "sentence-transformers (>=5.0.0,<6.0.0)",
+    "openai (>=1.97.0,<2.0.0)",
+    "qdrant-client (>=1.15.0,<2.0.0)",
+    "fastapi (>=0.116.1,<0.117.0)",
+    "python-dotenv (>=1.1.1,<2.0.0)",
+    "langchain-community (>=0.3.27,<0.4.0)",
+    "pymupdf (>=1.26.3,<2.0.0)",
+    "langchain-openai (>=0.3.28,<0.4.0)",
+    "uvicorn (>=0.35.0,<0.36.0)"
 ]
 
 
