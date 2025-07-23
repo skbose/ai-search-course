@@ -8,6 +8,11 @@ from app.embeddings.generator import generate_embeddings
 from app.vector_store.indexer import index_embeddings
 
 def upload_file(file):
+    """
+    Processes an uploaded PDF file by validating, chunking, generating embeddings, and indexing them, returning a detailed status message.
+    
+    The function validates the uploaded file to ensure it is a PDF, loads its content, splits it into text chunks, generates embeddings for each chunk, and indexes the embeddings into a Qdrant vector store. It returns a concatenated status message summarizing each processing step, including previews of chunk content and sample embedding data. If an error occurs, a detailed error message with traceback is returned.
+    """
     status = []  # Collect status messages
     try:
         if not file or not file.name:
@@ -54,6 +59,11 @@ def upload_file(file):
 
 
 def get_upload_ui():
+    """
+    Create and return a Gradio interface for uploading and indexing PDF files.
+    
+    The interface allows users to upload a PDF, processes the file through a document pipeline, and displays status messages for each processing step.
+    """
     return gr.Interface(
         fn=upload_file,
         inputs=gr.File(file_types=[".pdf"]),

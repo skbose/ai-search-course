@@ -12,13 +12,16 @@ except Exception as e:
 
 def generate_embeddings(chunks: List[Document]) -> List[List[float]]:
     """
-    Generates embeddings from a list of LangChain Document objects.
+    Generate embedding vectors for a list of LangChain Document objects.
     
-    Args:
-        chunks (List[Document]): List of text chunks.
+    Parameters:
+        chunks (List[Document]): Documents whose text content will be embedded.
     
     Returns:
-        List[List[float]]: List of embedding vectors.
+        List[List[float]]: Embedding vectors for each document's text. Returns an empty list if input is empty or if embedding generation fails.
+    
+    Raises:
+        ValueError: If all documents contain empty or whitespace-only text.
     """
     if not chunks:
         return []
@@ -37,13 +40,13 @@ def generate_embeddings(chunks: List[Document]) -> List[List[float]]:
 
 def generate_query_embedding(query: str) -> List[float]:
     """
-    Generates an embedding vector for a search query.
+    Generate an embedding vector for the given search query string.
     
-    Args:
-        query (str): The user's search query.
+    Raises:
+        ValueError: If the query is empty or contains only whitespace.
     
     Returns:
-        List[float]: Embedding vector for the query.
+        A list of floats representing the embedding vector for the query.
     """
     if not query or not query.strip():
         raise ValueError("Query cannot be empty")
