@@ -1,3 +1,4 @@
+from app.ui.user.query import chat_with_model_ui
 from dotenv import load_dotenv
 load_dotenv()
 import os
