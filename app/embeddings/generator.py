@@ -1,6 +1,8 @@
 from typing import List
 from langchain_openai import OpenAIEmbeddings
 from langchain_core.documents import Document
+from dotenv import load_dotenv
+load_dotenv()
 
 # Initialize once (reuse this instance)
 try:
