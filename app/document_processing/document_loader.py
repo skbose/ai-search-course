@@ -4,6 +4,18 @@ from langchain.schema import Document
 import os
 
 def load_pdf(file_path: str) -> List[Document]:
+    """
+    Load a PDF file from the specified path and return its contents as a list of Document objects.
+    
+    Parameters:
+        file_path (str): The path to the PDF file to be loaded.
+    
+    Returns:
+        List[Document]: A list of Document objects representing the contents of the PDF.
+    
+    Raises:
+        Exception: If the PDF cannot be loaded for any reason.
+    """
     loader = PyMuPDFLoader(file_path)
     try:
         return loader.load()
