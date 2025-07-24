@@ -12,6 +12,7 @@ if missing_vars:
 from fastapi import FastAPI
 from gradio.routes import mount_gradio_app
 from app.ui.admin.file_upload import get_upload_ui
+from app.ui.user.query import chat_with_model_ui
 
 app = FastAPI(
     title="AI Document Search API",
@@ -23,3 +24,4 @@ app = FastAPI(
 mount_gradio_app(app, get_upload_ui(), path="/admin/file-upload")
 
 # User query application route
+mount_gradio_app(app, chat_with_model_ui(), path="/user-chat")
