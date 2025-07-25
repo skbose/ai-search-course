@@ -1,6 +1,6 @@
 # vector_store/query.py
 from .qdrant_client import client
-from typing import List, Any
+from typing import List
 from qdrant_client.http.models import ScoredPoint
 from qdrant_client.models import SearchParams
 import os
@@ -40,4 +40,4 @@ def search_query(embedding: List[float], top_k: int = 5) -> List[ScoredPoint]:
         )
         return results
     except Exception as e:
-        raise Exception(f"Vector search failed: {str(e)}")
+        raise Exception(f"Vector search failed: {str(e)}") from e
