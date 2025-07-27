@@ -5,6 +5,20 @@ from typing import List
 from langchain.schema import Document
 
 def chunk_documents(documents: List[Document], chunk_size: int = 1000, chunk_overlap: int = 200) -> List[Document]:
+    """
+    Split a list of Document objects into smaller overlapping text chunks.
+    
+    Parameters:
+        documents (List[Document]): The list of Document objects to be chunked.
+        chunk_size (int, optional): Maximum number of characters in each chunk. Defaults to 1000.
+        chunk_overlap (int, optional): Number of overlapping characters between consecutive chunks. Defaults to 200.
+    
+    Returns:
+        List[Document]: A list of Document objects representing the resulting text chunks.
+    
+    Raises:
+        ValueError: If the documents list is empty, chunk_size is not positive, chunk_overlap is negative, or chunk_overlap is greater than or equal to chunk_size.
+    """
     if not documents:
         raise ValueError("Documents list cannot be empty")
     

@@ -5,7 +5,15 @@ import uuid
 
 def index_embeddings(embeddings: list[list[float]], texts: list[str]):
     """
-    Indexes the embedding vectors and their corresponding texts into Qdrant.
+    Indexes a list of embedding vectors and their associated texts into a Qdrant vector database.
+    
+    Parameters:
+        embeddings (list[list[float]]): Embedding vectors to be indexed.
+        texts (list[str]): Texts corresponding to each embedding vector.
+    
+    Raises:
+        ValueError: If either embeddings or texts is empty.
+        AssertionError: If the number of embeddings does not match the number of texts.
     """
     
     if not embeddings or not texts:

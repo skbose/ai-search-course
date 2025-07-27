@@ -1,3 +1,4 @@
+from app.ui.user.query import chat_with_model_ui
 from dotenv import load_dotenv
 load_dotenv()
 import os
@@ -23,3 +24,4 @@ app = FastAPI(
 mount_gradio_app(app, get_upload_ui(), path="/admin/file-upload")
 
 # User query application route
+mount_gradio_app(app, chat_with_model_ui(), path="/user-chat")

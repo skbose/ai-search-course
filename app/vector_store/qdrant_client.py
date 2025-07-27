@@ -15,7 +15,16 @@ except Exception as e:
     raise
 
 def ensure_collection(vector_size: int):
-    """Creates the collection if it doesn't exist."""
+    """
+    Ensure that a Qdrant collection with the specified vector size exists, creating it if necessary.
+    
+    Parameters:
+        vector_size (int): The dimensionality of the vectors to be stored in the collection. Must be a positive integer.
+    
+    Raises:
+        ValueError: If `vector_size` is not positive.
+        Exception: If an error occurs while checking or creating the collection.
+    """
     if vector_size <= 0:
         raise ValueError(f"Vector size must be positive, got {vector_size}")
     
