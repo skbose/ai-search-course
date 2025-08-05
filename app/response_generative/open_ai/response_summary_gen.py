@@ -46,3 +46,21 @@ def chat_summary(question: str, result_from_db: str) -> Optional[str]:
     except Exception as e:
         print(f"Error in chat_summary: {e}")
         return "Something went wrong, please try again."
+    
+def extract_candidate_texts(results):
+    """
+    Extracts valid non-empty text entries from the payloads of vector DB results.
+
+    Args:
+        results (list): List of vector DB search results.
+
+    Returns:
+        list[str]: A list of valid text strings extracted from payloads.
+    """
+    candidates = []
+    for item in results:
+        if hasattr(item, 'payload'):
+            text = item.payload.get('text')
+            if isinstance(text, str) and len(text.strip()) > 0:
+                candidates.append(text)
+    return candidates

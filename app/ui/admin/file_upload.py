@@ -30,7 +30,7 @@ def upload_file(file):
         status.append(f"✅ Loaded {len(docs)} page(s) from PDF.")
         
         # ✅ Step 2: Chunk the documents
-        chunks = chunk_documents(docs, 1000, 200)
+        chunks = chunk_documents(docs, 100, 20)
         status.append(f"✅ Created {len(chunks)} chunks.")
         
         # ✅ Step 3: Preview all chunk contents
