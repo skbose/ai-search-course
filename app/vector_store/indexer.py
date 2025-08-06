@@ -3,13 +3,15 @@ from .qdrant_client import client, ensure_collection, COLLECTION_NAME
 import uuid
 
 
-def index_embeddings(embeddings: list[list[float]], texts: list[str]):
+def index_embeddings(embeddings: list[list[float]], texts: list[str], user_id: str = None, document_id: str = None):
     """
     Indexes a list of embedding vectors and their associated texts into a Qdrant vector database.
     
     Parameters:
         embeddings (list[list[float]]): Embedding vectors to be indexed.
         texts (list[str]): Texts corresponding to each embedding vector.
+        user_id (str): ID of the user uploading the document.
+        document_id (str): Unique ID of the document being indexed.
     
     Raises:
         ValueError: If either embeddings or texts is empty.
@@ -26,7 +28,11 @@ def index_embeddings(embeddings: list[list[float]], texts: list[str]):
         PointStruct(
             id=str(uuid.uuid4()),
             vector=embedding,
-            payload={"text": text}
+            payload={
+                "text": text,
+                # "user_id": user_id,
+                # "document_id": document_id
+            }  
         )
         for embedding, text in zip(embeddings, texts, strict=True)
     ]

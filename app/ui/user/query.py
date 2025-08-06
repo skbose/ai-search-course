@@ -1,7 +1,7 @@
 from app.response_generative.open_ai.response_summary_gen import chat_summary
 from app.vector_store.query import search_query
 import gradio as gr
-from app.embeddings.generator import generate_query_embedding
+from app.embeddings.generator import generate_jina_query_embedding
 
 
 
@@ -30,16 +30,18 @@ def chat_function(message, history):
             return [{"role": "assistant", "content": "⚠️ Please enter something to continue."}]
         
         # 🔹 Step 1: Generate embedding
-        embeddings = generate_query_embedding(message)
+        embeddings = generate_jina_query_embedding(message)
         if not embeddings or not isinstance(embeddings, list):
             return [{"role": "assistant", "content": "⚠️ Failed to generate query embedding."}]
 
         
         # 🔹 Step 2: Search similar result with embedding
-        result = search_query(embeddings,top_k=1)
+        result = search_query(embeddings,top_k=10)
         if not result or not isinstance(result, list) or not hasattr(result[0], 'payload'):
             return [{"role": "assistant", "content": "⚠️ No results found in vector store."}]
 
+        print(result)
+        
         # ✅ Extract text from vector search payload
         texts = result[0].payload.get('text')
         if not texts or not isinstance(texts, str):
