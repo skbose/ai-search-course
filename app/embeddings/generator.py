@@ -73,7 +73,7 @@ def generate_query_embedding(query: str) -> List[float]:
         raise ValueError("Query cannot be empty")
     
     try:
-         return embedding_model.embed_query(query)
+        return embedding_model.embed_query(query)
     except Exception as e:
         print(f"❌ Failed to generate query embedding: {e}")
         raise
