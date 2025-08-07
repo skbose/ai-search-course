@@ -8,7 +8,6 @@ from dotenv import load_dotenv
 load_dotenv()
 import torch
 from langchain.schema import Document
-import uuid
 
 
 
@@ -79,6 +78,24 @@ model.eval()  # Disable dropout etc.
 def get_token_embeddings_local(
     chunks: List[Document], window_size: int = 200
 ) -> Tuple[List[List[float]], List[dict]]:
+    """
+    Generate mean pooled token embeddings for text chunks using a local transformer model.
+
+    This function processes each chunk of a document using a tokenizer and transformer model
+    to obtain token-level embeddings. It then applies late chunking by sliding a window over
+    the token embeddings and computes the mean embedding for each window. The corresponding
+    decoded text of each window is also collected as metadata.
+
+    Parameters:
+        chunks (List[Document]): A list of LangChain Document objects containing the text to process.
+        window_size (int, optional): The number of tokens per window for late chunking. 
+                                     Defaults to 200.
+
+    Returns:
+        Tuple[List[List[float]], List[str]]:
+            - A list of mean pooled embeddings (each is a list of floats) for each token window.
+            - A list of corresponding decoded text strings for each token window (used as metadata).
+    """
     chunk_vectors = []
     metadata_list = []
 

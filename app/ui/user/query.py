@@ -1,7 +1,7 @@
 from app.response_generative.open_ai.response_summary_gen import chat_summary,extract_candidate_texts
 from app.vector_store.query import search_query
 import gradio as gr
-from app.embeddings.generator import generate_query_embedding
+from app.embeddings.generator import generate_jina_query_embedding
 from sentence_transformers import CrossEncoder
 
 #load the cross-encoder model for ranking
@@ -69,6 +69,8 @@ def chat_function(message, history):
     
         # ✅ Join top-k contexts into a single string
         combined_context = "\n\n".join(top_k_contexts)
+        
+        print(f"🔍 Re-ordered context: {top_k_contexts}")
 
         # ✅ Extract text from vector search payload
         # texts = result[0].payload.get('text')
