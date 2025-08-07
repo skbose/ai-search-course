@@ -32,7 +32,6 @@ def chunk_documents(documents: List[Document], chunk_size: int = 1000, chunk_ove
     if chunk_overlap >= chunk_size:
         raise ValueError("Chunk overlap must be less than chunk size")
     
-    
     text_splitter = RecursiveCharacterTextSplitter(
         chunk_size=chunk_size,
         chunk_overlap=chunk_overlap,

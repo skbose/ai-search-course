@@ -1,13 +1,11 @@
 from typing import List, Tuple
 from transformers import AutoTokenizer, AutoModel
-from langchain_core.documents import Document
 from langchain_openai import OpenAIEmbeddings
 from langchain_community.embeddings import JinaEmbeddings  # For newer versions of LangChain
-from langchain_core.documents import Document
+from langchain.schema import Document
 from dotenv import load_dotenv
 load_dotenv()
 import torch
-from langchain.schema import Document
 
 
 
@@ -19,6 +17,19 @@ except Exception as e:
     print(f"❌ Failed to initialize OpenAI embeddings: {e}")
     print("💡 Make sure OPENAI_API_KEY is set in your environment")
     raise
+
+# Global variables for lazy loading
+_tokenizer = None
+_model = None
+
+def _get_local_model():
+    """Lazy load the local Jina model and tokenizer."""
+    global _tokenizer, _model
+    if _tokenizer is None:
+        _tokenizer = AutoTokenizer.from_pretrained("jinaai/jina-embeddings-v2-base-en")
+        _model = AutoModel.from_pretrained("jinaai/jina-embeddings-v2-base-en", trust_remote_code=True)
+        _model.eval()  # Disable dropout etc.
+    return _tokenizer, _model
 
 def generate_embeddings(chunks: List[Document]) -> List[List[float]]:
     """
@@ -68,12 +79,6 @@ def generate_query_embedding(query: str) -> List[float]:
         raise
 
 
-
-# Load Jina model locally
-tokenizer = AutoTokenizer.from_pretrained("jinaai/jina-embeddings-v2-base-en")
-model = AutoModel.from_pretrained("jinaai/jina-embeddings-v2-base-en", trust_remote_code=True)
-model.eval()  # Disable dropout etc.
-
 @torch.no_grad()
 def get_token_embeddings_local(
     chunks: List[Document], window_size: int = 200
@@ -96,6 +101,7 @@ def get_token_embeddings_local(
             - A list of mean pooled embeddings (each is a list of floats) for each token window.
             - A list of corresponding decoded text strings for each token window (used as metadata).
     """
+    tokenizer, model = _get_local_model()
     chunk_vectors = []
     metadata_list = []
 
@@ -107,9 +113,9 @@ def get_token_embeddings_local(
         # Get token embeddings [1, seq_len, hidden_dim]
         token_embeddings = outputs.last_hidden_state.squeeze(0)  # [seq_len, 768]
 
-        for i in range(0, token_embeddings.shape[0], window_size):
-            window = token_embeddings[i:i+window_size]
-            token_ids_window = input_ids[i:i + window_size]
+        for start_idx in range(0, token_embeddings.shape[0], window_size):
+            window = token_embeddings[start_idx:start_idx+window_size]
+            token_ids_window = input_ids[start_idx:start_idx + window_size]
             if window.shape[0] == 0:
                 continue
             
