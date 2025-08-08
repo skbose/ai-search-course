@@ -3,8 +3,8 @@ import os
 
 # ✅ Import your pipeline functions here
 from app.document_processing.document_loader import load_pdf
-from app.document_processing.text_chunker import chunk_documents
-from app.embeddings.generator import generate_embeddings
+from app.document_processing.text_chunker import token_chunk_documents
+from app.embeddings.generator import get_token_embeddings_local
 from app.vector_store.indexer import index_embeddings
 
 def upload_file(file):
@@ -29,26 +29,30 @@ def upload_file(file):
         docs = load_pdf(file_path)
         status.append(f"✅ Loaded {len(docs)} page(s) from PDF.")
         
-        # ✅ Step 2: Chunk the documents
-        chunks = chunk_documents(docs, 1000, 200)
+        # ✅ Step 2: Chunk the documents 
+        # chunks = chunk_documents(docs, 1000, 200)  # using character-based chunking
+        chunks = token_chunk_documents(docs, 6000, 500) # using token-based chunking
         status.append(f"✅ Created {len(chunks)} chunks.")
+        
         
         # ✅ Step 3: Preview all chunk contents
         status.append("📄 All chunks content:")
         for i, chunk in enumerate(chunks):
             # content_preview = chunk.page_content.strip()[:300]  # show only first 300 chars
             status.append(f"\n--- Chunk {i + 1} ---\n{chunk.page_content}")
-
+        
         # ✅ Step 4: Generate embeddings
-        embeddings = generate_embeddings(chunks)
+        embeddings, metadatas = get_token_embeddings_local(chunks, window_size=50)
         status.append(f"✅ Generated {len(embeddings)} embeddings.")
         status.append("🔢 Sample embedding (first 10 values): " + str(embeddings[0][:10]))
-
+        
+        status.append("🔍 metadata: " + str(metadatas))
+        
         # ✅ Step 5: Index into Qdrant
-        texts = [chunk.page_content for chunk in chunks]
-        index_embeddings(embeddings, texts)
+        # texts = [chunk.page_content for chunk in chunks]
+        index_embeddings(embeddings, metadatas)
         status.append("📥 Embeddings indexed into Qdrant successfully.")
-
+        
         return "\n\n".join(status)
 
     except Exception as e:
