@@ -2,21 +2,33 @@ from langchain_community.document_loaders import PyMuPDFLoader
 from typing import List
 from langchain.schema import Document
 
-def load_pdf(file_path: str) -> List[Document]:
+def load_pdf(file_path: str) -> Document:
     """
-    Load a PDF file from the specified path and return its contents as a list of Document objects.
-    
-    Parameters:
-        file_path (str): The path to the PDF file to be loaded.
-    
+    Load a PDF file and return all its contents as a single Document object.
+
+    Args:
+        file_path (str): Path to the PDF file.
+
     Returns:
-        List[Document]: A list of Document objects representing the contents of the PDF.
-    
+        Document: A single Document containing all the PDF text.
+
     Raises:
-        Exception: If the PDF cannot be loaded for any reason.
+        Exception: If loading the PDF fails.
     """
     loader = PyMuPDFLoader(file_path)
     try:
-        return loader.load()
+        pages: List[Document] = loader.load()
+        
+        if not pages:
+            raise Exception(f"No pages found in PDF: {file_path}")
+
+        # Combine all page contents
+        combined_text = "\n".join(page.page_content for page in pages)
+
+        # Optionally combine metadata (you can customize this)
+        combined_metadata = {"source": file_path, "total_pages": len(pages)}
+
+        return Document(page_content=combined_text, metadata=combined_metadata)
+    
     except Exception as e:
         raise Exception(f"Failed to load PDF {file_path}: {str(e)}") from e
