@@ -30,3 +30,29 @@ poetry add langchain[anthropic]
 
 poetry add sentence-transformers
 ```
+
+
+## 🚀 Steps to Run the Application
+
+### ✅ 1. Create Environment File
+Copy the `.env-example` to `.env` and update the values as needed
+
+
+### ✅ 2. Install Dependencies Using Poetry
+poetry install
+
+### ✅ 3. Start Qdrant Vector Store
+docker run -p 6333:6333 qdrant/qdrant
+
+
+### ✅ 4. Start the FastAPI App
+poetry run uvicorn app.main:app --host 0.0.0.0 --port 8000
+
+
+### ✅ 5. Interface URL to upload PDF files and to Generate Embeddings
+we have stored 2 sample files in /data folder
+http://127.0.0.1:8000/admin/file-upload
+
+
+### ✅ 6. Query Using Semantic Search (User chat interface URL)
+http://127.0.0.1:8000/user-chat
