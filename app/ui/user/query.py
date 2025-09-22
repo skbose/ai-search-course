@@ -3,6 +3,8 @@ from app.vector_store.query import search_query
 import gradio as gr
 from app.embeddings.generator import generate_jina_query_embedding
 from sentence_transformers import CrossEncoder
+from app.mlflow_utils import start_experiment, log_artifact, log_metrics, log_params
+import time,json
 
 #load the cross-encoder model for ranking
 # cross_encoder = CrossEncoder('cross-encoder/ms-marco-MiniLM-L-6-v2')
@@ -41,14 +43,29 @@ def chat_function(message, history):
         if not message or len(message.strip()) == 0:
             return [{"role": "assistant", "content": "⚠️ Please enter something to continue."}]
         
+        # Start mlflow run
+        with start_experiment("ChatbotQueries", run_name="user_query"):
+            log_params({
+                "llm_model":"gpt-5-nano",
+                "embedding_model": "jina-embeddings-v2-base-en",
+                "cross_encoder": "qnli-distilroberta-base",
+                "top_k_retrieval": 10,
+                "top_k_rerank": 5
+            })
+        
         # 🔹 Step 1: Generate embedding
+        t0 = time.time()
         embeddings = generate_jina_query_embedding(message)
+        log_metrics({"embedding_time_sec":time.time()-t0})
+
         if not embeddings or not isinstance(embeddings, list):
             return [{"role": "assistant", "content": "⚠️ Failed to generate query embedding."}]
 
         
         # 🔹 Step 2: Search similar result with embedding
+        t0 = time.time()
         result = search_query(embeddings,top_k=10)
+        log_metrics({"search_time_sec": time.time() - t0, "search_results": len(result)})
 
         print(f"🔍 Search result: {result}")
 
@@ -57,18 +74,35 @@ def chat_function(message, history):
         
         # ✅ Extract candidate texts
         candidates = extract_candidate_texts(result)
+        log_metrics({"num_candidates": len(candidates)})
+
+        # Save candidates as artifact
+        candidates_path = "data/candidates.json"
+        with open(candidates_path, "w") as f:
+            json.dump(candidates, f)
+        log_artifact(candidates_path)
 
         if not candidates:
             return [{"role": "assistant", "content": "⚠️ Retrieved content is empty or invalid."}]
 
         # 🔹 Step 3: Re-rank using cross-encoder
+        t0 = time.time()
         top_k_contexts = rerank_with_cross_encoder(message, candidates, top_k=5)
+        log_metrics({"rerank_time_sec": time.time() - t0, "rerank_results": len(top_k_contexts)})
+
 
         if not top_k_contexts:
             return [{"role": "assistant", "content": "⚠️ Failed to rerank retrieved texts."}]
     
         # ✅ Join top-k contexts into a single string
         combined_context = "\n\n".join(top_k_contexts)
+
+
+        # Save reranked contexts as artifact
+        reranked_path = "data/reranked.json"
+        with open(reranked_path, "w") as f:
+            json.dump(top_k_contexts, f)
+        log_artifact(reranked_path)
         
         print(f"🔍 Re-ordered context: {top_k_contexts}")
 
@@ -78,9 +112,19 @@ def chat_function(message, history):
         #     return [{"role": "assistant", "content": "⚠️ Invalid content retrieved from vector DB."}]
      
         # 🔹 Step 4: Generate summary from context + user question
+        t0 = time.time()
         summary = chat_summary(message, combined_context)
+        print(f"📝 Summary: {summary}")
+        log_metrics({"response_time_sec": time.time() - t0})
+
         if not summary or not isinstance(summary, str):
             return [{"role": "assistant", "content": "⚠️ Failed to generate response summary."}]
+        
+        # Save final answer as artifact
+        answer_path = "data/answer.json"
+        with open(answer_path, "w") as f:
+            json.dump({"query": message, "answer": summary}, f)
+        log_artifact(answer_path)
 
         return [{"role": "assistant", "content": summary}]
         

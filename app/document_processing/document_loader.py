@@ -27,8 +27,8 @@ def load_pdf(file_path: str) -> Document:
 
         # Optionally combine metadata (you can customize this)
         combined_metadata = {"source": file_path, "total_pages": len(pages)}
-
-        return Document(page_content=combined_text, metadata=combined_metadata)
+        print(combined_metadata)
+        return [Document(page_content=combined_text, metadata=combined_metadata)]
     
     except Exception as e:
         raise Exception(f"Failed to load PDF {file_path}: {str(e)}") from e

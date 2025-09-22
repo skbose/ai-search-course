@@ -56,3 +56,16 @@ http://127.0.0.1:8000/admin/file-upload
 
 ### ✅ 6. Query Using Semantic Search (User chat interface URL)
 http://127.0.0.1:8000/user-chat
+
+### to add mlflow
+poetry add mlflow[extras]
+
+### to run mlflow
+mlflow ui
+
+### to install validators
+guardrails configure  (to configure with your key fetch key from guardrails website)
+guardrails hub install hub://guardrails/regex_match
+guardrails hub install hub://guardrails/profanity_free
+guardrails hub install hub://guardrails/detect_pii
+

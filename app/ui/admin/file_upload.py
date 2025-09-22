@@ -1,11 +1,12 @@
 import gradio as gr
-import os
+import os, time, json
 
 # ✅ Import your pipeline functions here
 from app.document_processing.document_loader import load_pdf
 from app.document_processing.text_chunker import token_chunk_documents
 from app.embeddings.generator import get_token_embeddings_local
 from app.vector_store.indexer import index_embeddings
+from app.mlflow_utils import start_experiment, log_params, log_metrics, log_artifact
 
 def upload_file(file):
     """
@@ -22,16 +23,29 @@ def upload_file(file):
         # validate file file extension
         if not file_path.lower().endswith('.pdf'):
             return "❌ Invalid file type. Please upload a PDF file."
+        
+        # Start mlflow run
+        with start_experiment(run_name=f"document_upload_{os.path.basename(file_path)}"):
+            log_params({
+                "file_name":os.path.basename(file_path),
+                "embedding_model":"jina-embeddings-v2-base-en",
+                "chunk_size":6000,
+                "chunk_overlap":500,
+                "vector_db":"qdrant"
+            })
 
         status.append(f"✅ File received: {os.path.basename(file_path)}")
 
         # ✅ Step 1: Load the PDF
+        t0 = time.time()
         docs = load_pdf(file_path)
+        log_metrics({"load_time_sec":time.time()-t0,"num_pages":len(docs)})
         status.append(f"✅ Loaded {len(docs)} page(s) from PDF.")
         
         # ✅ Step 2: Chunk the documents 
         # chunks = chunk_documents(docs, 1000, 200)  # using character-based chunking
         chunks = token_chunk_documents(docs, 6000, 500) # using token-based chunking
+        log_metrics({"num_chunks":len(chunks)})
         status.append(f"✅ Created {len(chunks)} chunks.")
         
         
@@ -40,9 +54,16 @@ def upload_file(file):
         for i, chunk in enumerate(chunks):
             # content_preview = chunk.page_content.strip()[:300]  # show only first 300 chars
             status.append(f"\n--- Chunk {i + 1} ---\n{chunk.page_content}")
+
+        #save preview artifact
+        preview_path = "data/chunks_preview.json"
+        with open(preview_path,"w") as f:
+            json.dump([c.page_content[:300] for c in chunks],f)
+        log_artifact(preview_path)
         
         # ✅ Step 4: Generate embeddings
         embeddings, metadatas = get_token_embeddings_local(chunks, window_size=50)
+        log_metrics({"num_embeddings":len(embeddings)})
         status.append(f"✅ Generated {len(embeddings)} embeddings.")
         status.append("🔢 Sample embedding (first 10 values): " + str(embeddings[0][:10]))
         
